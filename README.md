@@ -71,7 +71,7 @@ The application will be live at:
 
 ---
 
-## Multi-Tab Demonstration Guide (Verifying Room Isolation)
+## Multi-Tab Demonstration Guide (Verifying Room Isolations)
 
 To experience real-time multiplayer chat and verify that room isolation works as intended:
 
