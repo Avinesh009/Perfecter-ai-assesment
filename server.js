@@ -18,16 +18,16 @@ const PORT = process.env.PORT || 3000;
 // 1. Serve static frontend files from public/ directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper: 12-hour formatted server timestamp (e.g., "5:04 PM")
+// Helper: Formatted 12-hour local time with 2-digit hour (e.g., "04:15 PM")
 function getFormattedTimestamp() {
   return new Date().toLocaleTimeString('en-US', {
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
     hour12: true
   });
 }
 
-// 5. Helper: Retrieve active users in a room via Socket.io adapter map
+// Helper: Retrieve active users in a room via Socket.io adapter map
 function getRoomUsers(room) {
   const roomSockets = io.sockets.adapter.rooms.get(room);
   if (!roomSockets) return [];
@@ -49,15 +49,16 @@ function getRoomUsers(room) {
 io.on('connection', (socket) => {
   console.log(`[Socket Connected] ID: ${socket.id}`);
 
-  // 2. 'join-room' event
+  // 'join-room' event
   socket.on('join-room', ({ username, room }) => {
     const cleanUsername = (username || '').trim() || `User_${socket.id.substring(0, 4)}`;
-    const cleanRoom = (room || '').trim() || 'general';
+    const cleanRoom = (room || '').trim().toLowerCase() || 'general';
 
     const oldRoom = socket.data.room;
 
     // Cleanly leave old room if switching rooms
     if (oldRoom && oldRoom !== cleanRoom) {
+      socket.to(oldRoom).emit('user-stop-typing', { username: socket.data.username });
       socket.leave(oldRoom);
       socket.to(oldRoom).emit('system-message', {
         id: crypto.randomUUID(),
@@ -83,7 +84,7 @@ io.on('connection', (socket) => {
     socket.emit('system-message', {
       id: crypto.randomUUID(),
       room: cleanRoom,
-      text: `Welcome to "${cleanRoom}", ${cleanUsername}!`,
+      text: `Welcome to "#${cleanRoom}", ${cleanUsername}!`,
       timestamp: getFormattedTimestamp()
     });
 
@@ -102,7 +103,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 3. 'chat-message' event: strict room isolation
+  // 'chat-message' event: strict room isolation
   socket.on('chat-message', (data) => {
     const currentRoom = socket.data.room;
     const currentUsername = socket.data.username;
@@ -134,7 +135,25 @@ io.on('connection', (socket) => {
     console.log(`[Message in "${currentRoom}"] ${payload.sender}: ${payload.text}`);
   });
 
-  // 4. 'disconnect' event
+  // 'typing' event
+  socket.on('typing', () => {
+    const room = socket.data.room;
+    const username = socket.data.username;
+    if (room && username) {
+      socket.to(room).emit('user-typing', { username });
+    }
+  });
+
+  // 'stop-typing' event
+  socket.on('stop-typing', () => {
+    const room = socket.data.room;
+    const username = socket.data.username;
+    if (room && username) {
+      socket.to(room).emit('user-stop-typing', { username });
+    }
+  });
+
+  // 'disconnect' event
   socket.on('disconnect', () => {
     const room = socket.data.room;
     const username = socket.data.username;
@@ -142,6 +161,9 @@ io.on('connection', (socket) => {
     console.log(`[Socket Disconnected] ID: ${socket.id} (${username || 'Unregistered'} in "${room || 'None'}")`);
 
     if (room && username) {
+      // Clear typing indicator for leaving user
+      socket.to(room).emit('user-stop-typing', { username });
+
       // Notify remaining room members
       socket.to(room).emit('system-message', {
         id: crypto.randomUUID(),
@@ -150,7 +172,7 @@ io.on('connection', (socket) => {
         timestamp: getFormattedTimestamp()
       });
 
-      // Update room users for remaining members in here
+      // Update room users for remaining members
       io.to(room).emit('room-users', {
         room: room,
         users: getRoomUsers(room)

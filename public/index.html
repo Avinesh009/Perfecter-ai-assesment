@@ -12,7 +12,7 @@
 <body>
   <div id="app" class="app-container">
 
-    <!-- Screen 1: Lobbys -->
+    <!-- Screen 1: Lobby -->
     <main id="lobby-screen" class="screen lobby-view">
       <div class="lobby-card">
         <div class="lobby-header">
@@ -83,6 +83,11 @@
         </div>
 
         <div class="header-right">
+          <!-- Audio Chime Toggle Button -->
+          <button id="mute-btn" class="btn-icon" title="Notification sounds enabled" aria-label="Toggle notifications audio">
+            <span id="mute-icon">🔔</span>
+          </button>
+
           <div class="user-pill">
             <span class="user-avatar-circle" id="user-avatar-letter">U</span>
             <span id="current-user-display" class="user-name-text">You</span>
@@ -102,6 +107,18 @@
       <section id="messages-container" class="messages-stream" aria-live="polite">
         <!-- Messages will be dynamically rendered here -->
       </section>
+
+      <!-- Live Typing Indicator Banner -->
+      <div id="typing-indicator" class="typing-indicator hidden" aria-live="polite">
+        <div class="typing-pill">
+          <span class="typing-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </span>
+          <span id="typing-text" class="typing-text">Someone is typing...</span>
+        </div>
+      </div>
 
       <!-- Footer Message Input -->
       <footer class="chat-footer">
