@@ -2,7 +2,7 @@
  * Client-side Real-time Chat Controller with Typing & Audio Chime
  */
 (() => {
-  // Socket.IO instance
+  // Socket.IO instances
   const socket = io({ autoConnect: true });
 
   // DOM Elements - Screens
