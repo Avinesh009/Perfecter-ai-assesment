@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multiplayer Chat with Rooms - Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0b0f19;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      gap: 2.5rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Floating Navigation Controls */
+    .slide-controls {
+      position: fixed;
+      bottom: 1.5rem;
+      background: rgba(30, 41, 59, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--card-border);
+      border-radius: 9999px;
+      padding: 0.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      z-index: 100;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide-controls button {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: color 0.15s;
+    }
+
+    .slide-controls button:hover {
+      color: var(--primary-light);
+    }
+
+    .slide-indicator {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* 16:9 Aspect Ratio Slide Container */
+    .slide {
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 3rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 1.25rem;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-title {
+      font-size: 1.95rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+
+    .slide-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .slide-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--card-border);
+      background: var(--card-bg);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+      flex: 1;
+      margin-top: 1.75rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      flex: 1;
+      margin-top: 1.75rem;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title.blue { color: var(--primary-light); }
+    .card-title.green { color: var(--accent-green); }
+    .card-title.amber { color: var(--accent-amber); }
+    .card-title.rose { color: var(--accent-rose); }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    .bullet {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin-top: 0.45rem;
+      flex-shrink: 0;
+    }
+
+    .bullet.green { background: var(--accent-green); }
+    .bullet.amber { background: var(--accent-amber); }
+    .bullet.rose { background: var(--accent-rose); }
+
+    /* Stack Pills */
+    .stack-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .stack-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--text-main);
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--card-border);
+      padding-top: 1rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Print Styles for PDF Export */
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+        gap: 0;
+      }
+
+      .slide-controls {
+        display: none !important;
+      }
+
+      .slide {
+        page-break-after: always;
+        break-after: page;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        max-width: none;
+        width: 100vw;
+        height: 100vh;
+        aspect-ratio: auto;
+        padding: 3rem 4rem;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Controls -->
+  <div class="slide-controls">
+    <button onclick="scrollToSlide('slide-1')">&#8592; Prev</button>
+    <span class="slide-indicator" id="slide-num-indicator">SLIDE 1 OF 2</span>
+    <button onclick="scrollToSlide('slide-2')">Next &#8594;</button>
+    <button onclick="window.print()" style="margin-left: 0.5rem; color: var(--accent-green);">Print / Save PDF</button>
+  </div>
+
+  <!-- =========================================================================
+       SLIDE 1: What was built & Stack used
+       ========================================================================= -->
+  <section class="slide" id="slide-1">
+    <div class="slide-header">
+      <div>
+        <div class="header-tag">Candidate Interview Presentation</div>
+        <h1 class="slide-title">Multiplayer Real-Time Chat with Rooms</h1>
+        <p class="slide-subtitle">Live room-isolated messaging engine with presence tracking and sound cues</p>
+      </div>
+      <div class="slide-num">01 / 02</div>
+    </div>
+
+    <div class="grid-2">
+      <!-- What was built -->
+      <div class="card">
+        <h2 class="card-title blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          What Was Built
+        </h2>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Strict Room Isolation:</strong> Messages and presence events are routed strictly via <code>io.to(room).emit</code> without cross-room data leakage.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Dynamic Presence Roster:</strong> Room member count dynamically updates via Socket.IO's internal adapter map (no zombie users).</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Debounced Live Typing:</strong> 1,200ms input debouncing notifies room members when peers are actively drafting a message.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Web Audio Chimes & Timestamps:</strong> Zero-dependency dual-sine synthesizer chime (E5 &rarr; A5) and synchronized 12-hour timestamps.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Automated Integration Testing:</strong> Headless multi-client test suite programmatically verifying room & typing isolation.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tech Stack Rationale -->
+      <div class="card">
+        <h2 class="card-title green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          Technology Stack & Rationale
+        </h2>
+        <div class="stack-tags">
+          <span class="stack-pill">Node.js 24</span>
+          <span class="stack-pill">Express 4.19</span>
+          <span class="stack-pill">Socket.IO 4.7</span>
+          <span class="stack-pill">Vanilla HTML5/CSS3</span>
+          <span class="stack-pill">Web Audio API</span>
+        </div>
+        <ul class="feature-list" style="margin-top: 0.5rem;">
+          <li class="feature-item">
+            <span class="bullet green"></span>
+            <div><strong>Zero Build-Step Friction:</strong> Direct ES6 and CSS3 served via Express eliminates webpack/vite compile steps, making demo startup instant.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet green"></span>
+            <div><strong>Resilient Transport:</strong> Socket.IO handles automatic fallback between WebSocket and HTTP long-polling with native reconnection logic.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet green"></span>
+            <div><strong>SPA View Switching:</strong> CSS-based state toggling enables instant lobby-to-chat transitions without tearing down socket connections.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Candidate: Avinesh</span>
+      <span>Repo: Multiplayer Chat with Rooms &bull; <code>npm test</code> Passing</span>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       SLIDE 2: Critical Evaluation & Nuances
+       ========================================================================= -->
+  <section class="slide" id="slide-2">
+    <div class="slide-header">
+      <div>
+        <div class="header-tag">Engineering Reflections & AI Insights</div>
+        <h1 class="slide-title">Critical Evaluation & Future Architecture</h1>
+        <p class="slide-subtitle">AI guidance analysis, production scaling path, and architectural uncertainties</p>
+      </div>
+      <div class="slide-num">02 / 02</div>
+    </div>
+
+    <div class="grid-3">
+      <!-- What AI Got Wrong -->
+      <div class="card">
+        <h2 class="card-title rose">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          What the AI Got Wrong
+        </h2>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="bullet rose"></span>
+            <div><strong>Global Broadcast Leaks:</strong> Initially proposed broadcasting all messages to all sockets and filtering on the client side (major security flaw).</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet rose"></span>
+            <div><strong>Presence Desynchronization:</strong> Attempted naive in-memory arrays (<code>users[]</code>) which resulted in ghost users on sudden socket drops.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet rose"></span>
+            <div><strong>External Audio Fragility:</strong> Attempted to load static <code>.mp3</code> files, requiring human redirection to native Web Audio oscillators.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- What to Do in Production -->
+      <div class="card">
+        <h2 class="card-title amber">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>
+          Production Evolution
+        </h2>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="bullet amber"></span>
+            <div><strong>Horizontal Scale via Redis:</strong> Implement <code>@socket.io/redis-adapter</code> to broadcast room events seamlessly across multiple cluster nodes.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet amber"></span>
+            <div><strong>Persistent Storage:</strong> PostgreSQL / MongoDB storage for message persistence, chat history pagination, and read receipts.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet amber"></span>
+            <div><strong>Identity & Security:</strong> JWT-based handshake authentication, room permission ACLs, and Redis-backed token bucket rate limiting.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Least Sure About -->
+      <div class="card">
+        <h2 class="card-title blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          Least Sure About
+        </h2>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Partition Message Recovery:</strong> Handling client reconnection storms during brief network dropouts without message loss or duplications.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Ordering & Idempotency:</strong> Guaranteeing strictly ordered message delivery across distributed servers when clients emit messages simultaneously.</div>
+          </li>
+          <li class="feature-item">
+            <span class="bullet"></span>
+            <div><strong>Backpressure Limits:</strong> Managing socket buffer backpressure when a slow mobile client falls behind in high-throughput channels.</div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>Key takeaway: AI excels at boilerplate, but human systems thinking is essential for security & distributed edge cases.</span>
+      <span>Slide 2 of 2</span>
+    </div>
+  </section>
+
+  <script>
+    function scrollToSlide(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('slide-num-indicator').textContent = 
+          id === 'slide-1' ? 'SLIDE 1 OF 2' : 'SLIDE 2 OF 2';
+      }
+    }
+
+    // Keyboard navigation (Arrow Left / Arrow Right)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+        scrollToSlide('slide-2');
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        scrollToSlide('slide-1');
+      }
+    });
+
+    // Observer to update indicator
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.getElementById('slide-num-indicator').textContent = 
+            id === 'slide-1' ? 'SLIDE 1 OF 2' : 'SLIDE 2 OF 2';
+        }
+      });
+    }, { threshold: 0.6 });
+
+    document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
