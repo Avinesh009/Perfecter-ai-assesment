@@ -1,0 +1,24 @@
+{
+  "name": "multiplayer-room-chat",
+  "version": "1.0.0",
+  "description": "Real-time multiplayer chat application with room-based messaging using Express and Socket.io",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "chat",
+    "real-time",
+    "socket.io",
+    "express",
+    "rooms"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
