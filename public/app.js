@@ -15,7 +15,7 @@
   const roomInput = document.getElementById('room-input');
   const roomTags = document.querySelectorAll('.room-tag');
 
-  // DOM Elements - Chat Header & Meta
+  // DOM Elements - Chat Header & Metas
   const activeRoomTitle = document.getElementById('active-room-title');
   const activeUsersCount = document.getElementById('active-users-count');
   const currentUserDisplay = document.getElementById('current-user-display');
