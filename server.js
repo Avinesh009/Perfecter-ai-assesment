@@ -150,7 +150,7 @@ io.on('connection', (socket) => {
         timestamp: getFormattedTimestamp()
       });
 
-      // Update room users for remaining members
+      // Update room users for remaining members in here
       io.to(room).emit('room-users', {
         room: room,
         users: getRoomUsers(room)
